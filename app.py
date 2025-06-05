@@ -77,7 +77,10 @@
 #     port = int(os.environ.get('PORT', 5000))  # default to 5000 locally
 #     socketio.run(app, port=port, debug=True, use_reloader=False)
 
-from flask import Flask, request, jsonify, send_from_directory
+import eventlet
+eventlet.monkey_patch()  # 🟢 Must be FIRST
+
+from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, send, emit
 from flask_cors import CORS
 from datetime import datetime
