@@ -3,3 +3,4 @@ flask-socketio
 flask-cors
 datetime
 gunicorn
+eventlet
