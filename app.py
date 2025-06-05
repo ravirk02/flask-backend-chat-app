@@ -82,6 +82,8 @@ eventlet.monkey_patch()  # 🟢 Must be FIRST
 
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, send, emit
+from flask import send_from_directory
+
 from flask_cors import CORS
 from datetime import datetime
 import os
