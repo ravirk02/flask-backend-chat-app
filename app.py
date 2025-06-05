@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, send, emit
 from flask_cors import CORS
 from datetime import datetime
-
+import os
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -73,5 +73,7 @@ def handle_file(data):
     print(f"File received from {data.get('user')}: {data.get('fileName')}")
     emit('file', data, broadcast=True)
 
+
 if __name__ == '__main__':
-    socketio.run(app, port=5000, debug=True, use_reloader=False)
+    port = int(os.environ.get('PORT', 5000))  # default to 5000 locally
+    socketio.run(app, port=port, debug=True, use_reloader=False)
