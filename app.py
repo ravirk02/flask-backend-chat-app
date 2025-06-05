@@ -163,5 +163,6 @@ def handle_file(data):
     emit('file', data, broadcast=True)
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # default to 5000 locally
-    socketio.run(app, port=port, debug=False, use_reloader=False)
+    port = int(os.environ.get('PORT', 5000))
+    socketio.run(app, host='0.0.0.0', port=port, debug=False)
+
