@@ -90,7 +90,13 @@ import os
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    async_mode="eventlet",  # explicitly mention this
+    logger=True,            # helpful for debugging
+    engineio_logger=True
+)
 
 # In-memory user store: phone -> password
 users = {
