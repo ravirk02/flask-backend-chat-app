@@ -87,6 +87,8 @@ from flask import send_from_directory
 from flask_cors import CORS
 from datetime import datetime
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -100,8 +102,14 @@ socketio = SocketIO(
 
 # In-memory user store: phone -> password
 users = {
-    "8737043934": {"password": "Sunshine@2002", "username": "Shinchan"},
-    "7518917530": {"password": "Shinchan@2007", "username": "Sunshine"}
+    os.getenv("USER1_PHONE"): {
+        "password": os.getenv("USER1_PASSWORD"),
+        "username": os.getenv("USER1_USERNAME")
+    },
+    os.getenv("USER2_PHONE"): {
+        "password": os.getenv("USER2_PASSWORD"),
+        "username": os.getenv("USER2_USERNAME")
+    }
 }
 
 connected_users = {}
