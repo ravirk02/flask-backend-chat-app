@@ -70,20 +70,20 @@ def handle_join(data):
     username = data.get('username', 'Unknown')
     print(f"{username} joined")
     connected_users[request.sid] = username
-    timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S UTC")
+    timestamp = datetime.now().strftime("%H:%M:%S")
     send({'user': 'System', 'text': f'🔔 {username} joined the chat', 'time': timestamp}, broadcast=True)
 
 @socketio.on('disconnect')
 def handle_disconnect():
     username = connected_users.get(request.sid, 'Unknown')
     print(f"{username} disconnected")
-    timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S UTC")
+    timestamp = datetime.now().strftime("%H:%M:%S")
     send({'user': 'System', 'text': f'❌ {username} left the chat', 'time': timestamp}, broadcast=True)
     connected_users.pop(request.sid, None)
 
 @socketio.on('message')
 def handle_message(data):
-    timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S UTC")
+    timestamp = datetime.now().strftime("%H:%M:%S")
     print(f"{data['user']} said: {data['text']} at {timestamp}")
     data['time'] = timestamp
     send(data, broadcast=True)
@@ -96,7 +96,7 @@ def handle_typing(data):
 
 @socketio.on('file')
 def handle_file(data):
-    timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S UTC")
+    timestamp = datetime.now().strftime("%H:%M:%S")
     data['time'] = timestamp
     print(f"File received from {data.get('user')}: {data.get('fileName')}")
     emit('file', data, broadcast=True)
