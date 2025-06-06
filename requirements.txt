@@ -4,3 +4,4 @@ flask-cors
 datetime
 gunicorn
 eventlet
+python-dotenv
