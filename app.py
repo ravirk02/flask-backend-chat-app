@@ -81,12 +81,28 @@ def handle_disconnect():
     send({'user': 'System', 'text': f'❌ {username} left the chat', 'time': timestamp}, broadcast=True)
     connected_users.pop(request.sid, None)
 
+# @socketio.on('message')
+# def handle_message(data):
+#     timestamp = datetime.now().strftime("%H:%M:%S")
+#     print(f"{data['user']} said: {data['text']} at {timestamp}")
+#     data['time'] = timestamp
+#     send(data, broadcast=True)
 @socketio.on('message')
 def handle_message(data):
     timestamp = datetime.now().strftime("%H:%M:%S")
     print(f"{data['user']} said: {data['text']} at {timestamp}")
-    data['time'] = timestamp
-    send(data, broadcast=True)
+
+    # Optional: handle replyTo field
+    reply_to = data.get('replyTo')  # could be None or a dict with original message info
+
+    message_data = {
+        'user': data['user'],
+        'text': data['text'],
+        'time': timestamp,
+        'replyTo': reply_to  # include this only if it exists
+    }
+
+    send(message_data, broadcast=True)
 
 @socketio.on('typing')
 def handle_typing(data):
