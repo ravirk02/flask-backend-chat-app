@@ -71,14 +71,14 @@ def handle_join(data):
     print(f"{username} joined")
     connected_users[request.sid] = username
     timestamp = datetime.now().strftime("%H:%M:%S")
-    send({'user': 'System', 'text': f'🔔 {username} joined the chat', 'time': timestamp}, broadcast=True)
+    send({'user': '💬 Chat Genie', 'text': f'🔔 {username} joined the chat', 'time': timestamp}, broadcast=True)
 
 @socketio.on('disconnect')
 def handle_disconnect():
     username = connected_users.get(request.sid, 'Unknown')
     print(f"{username} disconnected")
     timestamp = datetime.now().strftime("%H:%M:%S")
-    send({'user': 'System', 'text': f'❌ {username} left the chat', 'time': timestamp}, broadcast=True)
+    send({'user': '💬 Chat Genie', 'text': f'❌ {username} left the chat', 'time': timestamp}, broadcast=True)
     connected_users.pop(request.sid, None)
 
 # @socketio.on('message')
