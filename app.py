@@ -30,16 +30,29 @@ users = {
     }
 }
 
+# sid -> username
 connected_users = {}
+
+
+def broadcast_online_users():
+    """Saare connected users ki list broadcast karo."""
+    online = list(connected_users.values())
+    socketio.emit("online_users", {"users": online})
+
 
 @app.route('/')
 def home():
     return "Flask Backend Chat App is running."
 
+
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(
+        os.path.join(app.root_path, 'static'),
+        'favicon.ico',
+        mimetype='image/vnd.microsoft.icon'
+    )
+
 
 @app.route('/login', methods=['POST', 'OPTIONS'])
 def login():
@@ -59,73 +72,81 @@ def login():
     else:
         return jsonify({'success': False, 'message': 'Invalid phone or password'}), 401
 
+
 @socketio.on('connect')
 def handle_connect():
-    print(f"A user connected with session ID: {request.sid}")
+    print(f"User connected: {request.sid}")
+
 
 @socketio.on('join')
 def handle_join(data):
     username = data.get('username')
     if not username:
-        print("Join event missing username. Ignoring.")
         return
 
-    print(f"{username} joined")
+    # Agar pehle se joined hai (reconnect case) toh update karo
     connected_users[request.sid] = username
-    timestamp = datetime.now().strftime("%H:%M:%S")
-    send({'user': '💬 Chat Genie', 'text': f'🔔 {username} joined the chat', 'time': timestamp}, broadcast=True)
+    print(f"{username} joined (sid: {request.sid})")
+
+    timestamp = datetime.now().strftime("%H:%M")
+    send(
+        {'user': '💬 Chat Genie', 'text': f'🔔 {username} joined the chat', 'time': timestamp},
+        broadcast=True
+    )
+
+    # ✅ Online users update bhejo
+    broadcast_online_users()
+
 
 @socketio.on('disconnect')
 def handle_disconnect():
     username = connected_users.pop(request.sid, None)
     if username:
         print(f"{username} disconnected")
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        send({'user': '💬 Chat Genie', 'text': f'❌ {username} left the chat', 'time': timestamp}, broadcast=True)
+        timestamp = datetime.now().strftime("%H:%M")
+        send(
+            {'user': '💬 Chat Genie', 'text': f'❌ {username} left the chat', 'time': timestamp},
+            broadcast=True
+        )
+        # ✅ Online users update bhejo
+        broadcast_online_users()
     else:
-        print(f"Disconnected session {request.sid} had no associated username.")
+        print(f"Unknown session disconnected: {request.sid}")
+
 
 @socketio.on('message')
 def handle_message(data):
     username = data.get('user')
     if not username:
-        print("Message event missing username. Ignoring.")
         return
 
-    timestamp = datetime.now().strftime("%H:%M:%S")
-    print(f"{username} said: {data['text']} at {timestamp}")
-
-    reply_to = data.get('replyTo')
+    timestamp = datetime.now().strftime("%H:%M")
+    print(f"{username}: {data.get('text')} at {timestamp}")
 
     message_data = {
         'user': username,
         'text': data['text'],
         'time': timestamp,
-        'replyTo': reply_to
+        'replyTo': data.get('replyTo')
     }
+    send(message_data, broadcast=True)
 
-    send(message_data, broadcast=True) # type: ignore
 
 @socketio.on('typing')
 def handle_typing(data):
     username = data.get('username')
     if not username:
-        print("Typing event missing username. Ignoring.")
         return
-
-    print(f"{username} is typing...")
     emit('typing', {'user': username}, broadcast=True, include_self=False)
 
 @socketio.on('file')
 def handle_file(data):
     username = data.get('user')
     if not username:
-        print("File event missing username. Ignoring.")
         return
-
-    timestamp = datetime.now().strftime("%H:%M:%S")
+    timestamp = datetime.now().strftime("%H:%M")
     data['time'] = timestamp
-    print(f"File received from {username}: {data.get('fileName')}")
+    print(f"File from {username}: {data.get('fileName')}")
     emit('file', data, broadcast=True)
 
 if __name__ == '__main__':
